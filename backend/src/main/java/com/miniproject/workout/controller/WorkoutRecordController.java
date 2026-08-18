@@ -1,6 +1,9 @@
 package com.miniproject.workout.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -26,6 +29,11 @@ public class WorkoutRecordController {
 				request.weight(),
 				request.reps(),
 				request.sets());
+	}
+
+	@GetMapping("/api/workouts")
+	public List<WorkoutRecord> list() {
+		return workoutRecordService.findAll();
 	}
 
 	public record WorkoutRecordRequest(String exerciseName, Double weight, Integer reps, Integer sets) {
