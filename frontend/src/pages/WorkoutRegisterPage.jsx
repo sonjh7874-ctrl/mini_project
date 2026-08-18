@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { registerWorkout } from '../api/workoutApi'
+import { useEffect, useState } from 'react'
+import { fetchWorkouts, registerWorkout } from '../api/workoutApi'
 
 const initialForm = {
   exerciseName: '',
@@ -11,6 +11,22 @@ const initialForm = {
 function WorkoutRegisterPage() {
   const [form, setForm] = useState(initialForm)
   const [status, setStatus] = useState(null) // { type: 'success' | 'error', message: string }
+  const [workouts, setWorkouts] = useState([])
+  const [listError, setListError] = useState(null)
+
+  async function loadWorkouts() {
+    try {
+      const data = await fetchWorkouts()
+      setWorkouts(data)
+      setListError(null)
+    } catch (error) {
+      setListError(error.message)
+    }
+  }
+
+  useEffect(() => {
+    loadWorkouts()
+  }, [])
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -30,6 +46,7 @@ function WorkoutRegisterPage() {
       })
       setStatus({ type: 'success', message: '운동 기록이 등록되었습니다.' })
       setForm(initialForm)
+      await loadWorkouts()
     } catch (error) {
       setStatus({ type: 'error', message: error.message })
     }
@@ -87,6 +104,33 @@ function WorkoutRegisterPage() {
         <button type="submit">등록</button>
       </form>
       {status && <p role="alert">{status.message}</p>}
+
+      <h2>운동 기록 목록</h2>
+      {listError && <p role="alert">{listError}</p>}
+      {workouts.length === 0 ? (
+        <p>등록된 운동 기록이 없습니다.</p>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>운동명</th>
+              <th>중량 (kg)</th>
+              <th>횟수</th>
+              <th>세트</th>
+            </tr>
+          </thead>
+          <tbody>
+            {workouts.map((workout) => (
+              <tr key={workout.id}>
+                <td>{workout.exerciseName}</td>
+                <td>{workout.weight}</td>
+                <td>{workout.reps}</td>
+                <td>{workout.sets}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </section>
   )
 }
